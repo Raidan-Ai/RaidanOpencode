@@ -1,0 +1,31 @@
+Copyright (c) 2026 Raidan-Ai. All Rights Reserved.
+
+This project contains software source code from the following third-party projects:
+
+1. OpenAgentsControl (darrenhinde) — MIT License — Concepts adapted with attribution
+2. 5dive (5dive-ai) — MIT License — Concepts adapted with attribution
+3. agent-console (buhuipao) — Apache-2.0 License — Concepts adapted with attribution
+4. agent-deck (asheshgoplani) — MIT License — Concepts adapted with attribution
+5. agent-manager (YoanWai) — Apache-2.0 License — Concepts adapted with attribution
+6. agent-of-empires — MIT License — Concepts adapted with attribution
+7. agent-squid/squid — MIT License — Concepts adapted with attribution
+8. agx (ramarlina) — No formal license — Concepts adapted with attribution
+9. clideck (rustykuntz) — MIT License — Concepts adapted with attribution
+10. ai-maestro (23blocks-OS) — MIT License — Concepts adapted with attribution
+11. nimbalyst (nimbalyst) — MIT License — Concepts adapted with attribution
+12. ponytail (DietrichGebert) — MIT License — Concepts adapted with attribution
+13. agentic-flow (ruvnet) — No license specified — Concepts adapted with attribution
+14. opencode-swarm (ZaxbyHub) — MIT License — Concepts adapted with attribution
+15. kandev (kdlbs) — AGPL-3.0 — Concepts only, code not reusable
+16. deer-flow (bytedance) — MIT — Focused extraction
+17. ruflo (ruvnet) — MIT — Focused extraction
+18. oh-my-openagent (code-yeongyu) — Other — Documentation only reviewed
+
+NO AGPL-3.0 code is included in this project. Only architectural ideas and public documentation concepts were extracted from AGPL-licensed repositories, and only with explicit attribution.
+
+For third-party code that IS included (none currently), full license terms are preserved in original source form.
+
+This software was built using ideas from the following open-source projects and their authors:
+- darrenhinde, 5dive-ai, 777genius, buhuipao, asheshgoplani, YoanWai, agent-of-empires, Untrivial-ai, agent-squid, ramarlina, rustykuntz, 23blocks-OS, zeronsh, kdlbs, ZaxbyHub, nimbalyst, DietrichGebert, ruvnet, bytedance, code-yeongyu
+
+See SOURCES.md for complete attribution.
