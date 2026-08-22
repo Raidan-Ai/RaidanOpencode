@@ -98,7 +98,7 @@ This project synthesizes engineering capabilities from 21 leading open-source re
   - CI fix feedback loop patterns (adapted to Layer 13 review events)
 - **Code Reused**: NO code reused. Architecture Synthesis Rule explicitly states: "DO NOT embed Agent Orchestrator as another orchestrator." RaidanOpencode has exactly one canonical orchestrator (Layer 7). Concepts reimplemented independently.
 - **Date Reviewed**: 2026-08-23
-- **Attribution Note**: "RaidanOpencode does not embed the agent-orchestrator codebase. The canonical orchestrator (Layer 7) is original implementation. Task planning, code review, and merge coordination concepts are reimplemented independently with inspiration from but not copying agent-orchestrator."
+- **Attribution Note**: "RaidanOpencode does not embed the agent-orchestrator codebase. The canonical orchestrator (Layer 7) is original implementation. Task planning, code review, and merge coordination concepts are reimplemented with inspiration from but not copying agent-orchestrator."
 
 **9. agent-squid/squid** (https://github.com/agent-squid/squid)
 - **Author/Organization**: agent-squid
@@ -196,7 +196,7 @@ This project synthesizes engineering capabilities from 21 leading open-source re
 
 **18. agentic-flow** (https://github.com/ruvnet/agentic-flow)
 - **Author/Organization**: ruvnet
-- **License**: No license specified in metadata
+- **License**: No formal license specified
 - **Ideas Adopted**:
   - Model switching between low-cost alternatives
   - Model fallback chain pattern (primary → fallback → emergency → human)
@@ -213,7 +213,7 @@ This project synthesizes engineering capabilities from 21 leading open-source re
   - Agent-to-agent messaging systems
   - Memory system patterns (scaled for RaidanOpencode scope)
   - Workflow orchestration ideas
-- **Code Reused**: No code directly analyzed due to repository scale (80,555 stars). Only specific capability concepts extracted with focused analysis. Full repository not analyzed due to scope.
+- **Code Reused**: No code directly reused. Repository is extremely large (80,555 stars); only specific capability concepts extracted with focused analysis. Full repository not analyzed due to scope.
 - **Date Reviewed**: 2026-08-23
 
 **20. ruflo** (https://github.com/ruvnet/ruflo)
@@ -224,7 +224,7 @@ This project synthesizes engineering capabilities from 21 leading open-source re
   - Adaptive memory ideas
   - RAG integration patterns (conceptual inspiration for Layer 9 Context Engine)
   - Self-learning intelligence concepts (observability influence)
-- **Code Reused**: No code directly analyzed due to repository scale (68,837 stars). Only specific capability concepts extracted with focused analysis. Full repository not analyzed due to scope.
+- **Code Reused**: No code directly reused. Repository is extremely large (68,837 stars); only specific capability concepts extracted with focused analysis. Full repository not analyzed due to scope.
 - **Date Reviewed**: 2026-08-23
 
 **21. oh-my-openagent** (https://github.com/code-yeongyu/oh-my-openagent)
@@ -235,7 +235,7 @@ This project synthesizes engineering capabilities from 21 leading open-source re
   - Orchestration concepts
   - Skill management ideas
   - TUI patterns
-- **Code Reused**: No code analyzed due to "Other" license and repository scale (68,234 stars). Only public documentation and architectural ideas reviewed.
+- **Code Reused**: No code directly analyzed due to "Other" license and repository scale (68,234 stars). Only public documentation and architectural ideas reviewed.
 - **Date Reviewed**: 2026-08-23
 
 ### License Compliance
@@ -266,6 +266,8 @@ This project synthesizes engineering capabilities from 21 leading open-source re
 
 #### Insufficient Metadata
 - comet (zeronsh) — No descriptive metadata; concepts not extracted
+- agentic-flow (ruvnet) — No license specified; concepts extracted with attribution
+- agx (ramarlina) — No formal license; concepts extracted with attribution
 
 ### Third-Party Notices
 
