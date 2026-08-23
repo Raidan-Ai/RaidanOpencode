@@ -1,0 +1,82 @@
+name: RaidanOpencode
+version: 0.2.0-phase2
+description: Unified AI Agent Engineering Operating System for OpenCode
+
+platforms:
+  - windows
+  - linux
+  - wsl
+
+categories:
+  - foundation
+  - agents
+  - tools
+  - memory
+  - protocols
+  - gateway
+  - models
+  - rag
+  - integration
+  - security
+  - evaluation
+  - observability
+  - production
+
+# Canonical subsystems (exactly ONE each) — see docs/research/deduplication.md
+subsystems:
+  agent-registry:      { path: core/agents,       status: planned }
+  team-engine:         { path: core/teams,        status: planned }
+  task-engine:         { path: core/tasks,        status: planned }
+  workflow-engine:     { path: core/workflows,    status: planned }
+  orchestrator:        { path: core/orchestration, status: planned }
+  capability-router:   { path: core/routing,      status: planned }
+  model-router:        { path: core/gateway,      status: planned }
+  provider-router:     { path: core/gateway,      status: planned }
+  ai-gateway:          { path: core/gateway,      status: planned }
+  context-engine:      { path: core/context,      status: planned }
+  memory-engine:       { path: core/memory,       status: planned }
+  skill-registry:      { path: skills + registry, status: planned }
+  mcp-registry:        { path: integrations/mcp,  status: governed-native }
+  a2a-adapter:         { path: integrations/a2a,  status: planned }
+  policy-engine:       { path: core/policies,     status: planned }
+  runtime-supervisor:  { path: core/runtime,      status: planned }
+  event-bus:           { path: core/events,       status: planned }
+  notification-engine: { path: core/notifications, status: planned }
+  observability:       { path: core/observability, status: planned }
+  evaluation:          { path: core/evaluation,   status: planned }
+  migration-engine:    { path: apps/cli/migrate,  status: planned }
+  config-manager:      { path: core/config,       status: planned }
+  setup-wizard:        { path: apps/cli/setup,    status: planned }
+  cli:                 { path: apps/cli,          status: scaffolded }
+  control-center:      { path: apps/control-center, status: deferred-view }
+
+# Actual configured state (populated by installer; secrets NEVER here)
+providers:
+  - id: omiroute-local
+    kind: gateway-openai-compatible
+    baseURL: http://localhost:20128/v1
+    models: [auto/best-coding, auto/best-reasoning, auto/best-fast, auto/best-coding-fast, auto/best-chat, auto/coding, auto/chat, auto/fast]
+    auth: env-ref
+    status: detected-existing
+models: []
+skills:
+  inventory_count_user_global: 1564
+  curated_shipped: []
+agents: []
+teams: []
+mcp:
+  - name: github
+    type: remote
+    url: https://api.githubcopilot.com/mcp/
+    auth: "{env:GITHUB_TOKEN}"
+    risk: low
+    verified_connected: true
+    added: 2026-08-23
+a2a: []
+connectors: []
+deployments: []
+
+policies:
+  default_mode: supervised
+  telemetry: "off"
+profiles_available: [minimal, developer, agent-engineering, full-stack-ai, research, enterprise, self-hosted, local-only, secure, autonomous]
