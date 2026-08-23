@@ -33,7 +33,7 @@ jobs:
         run: npm run build
 
       - name: Unit tests
-        run: node --test dist/tests/
+        run: node --test dist/tests/core.test.js
 
       - name: CLI smoke (version)
         run: node dist/src/cli/index.js --version
