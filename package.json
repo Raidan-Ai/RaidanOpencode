@@ -1,0 +1,40 @@
+{
+  "name": "raidan-opencode",
+  "version": "0.3.0",
+  "description": "RaidanOpencode — Unified AI Agent Engineering Operating System for OpenCode",
+  "author": {
+    "name": "Raidan Ameen",
+    "url": "https://raidan.bio/"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Raidan-Ai/RaidanOpencode.git"
+  },
+  "homepage": "https://github.com/Raidan-Ai/RaidanOpencode#readme",
+  "type": "module",
+  "bin": {
+    "raidan": "./dist/src/cli/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run build && node --test dist/tests/core.test.js",
+    "smoke": "node dist/src/cli/index.js --version && node dist/src/cli/index.js doctor",
+    "cli": "node dist/src/cli/index.js"
+  },
+  "dependencies": {
+    "commander": "^12.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0"
+  },
+  "keywords": [
+    "opencode", "ai-agents", "agent-orchestration", "mcp", "a2a",
+    "multi-agent", "llm-gateway", "developer-tools"
+  ]
+}

@@ -1,26 +1,10 @@
-# RaidanOpencode
-# Portable OpenCode Agent Operating System
-
-# Dependencies
 node_modules/
-.pnpm/
-
-# OpenCode configuration (machine-specific)
-.opencode/
-.env*
-
-# Secrets (never commit)
-*.key
-*.pem
-*.token
-
-# OS-specific
+dist/
+*.log
+.env
+.env.*
+!.env.example
+backups/
+*.bak
 .DS_Store
 Thumbs.db
-
-# IDE
-.vscode/
-.idea/
-
-# Temporary
-tmp/
