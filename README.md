@@ -77,11 +77,11 @@ Full roadmap (`init` wizard, model router, A2A adapter, runtime supervisor): [`d
 
 ## Documentation
 
-English: [`docs/en`](docs/en) · العربية: [`docs/ar`](docs/ar) · Research: [`docs/research`](docs/research) (21 source repos analyzed) · Decisions: [`docs/adr`](docs/adr) (ADR-001…020) · Provenance: [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) + [`docs/sources/source-manifest.yaml`](docs/sources/source-manifest.yaml)
+English: [`docs/en`](docs/en) · العربية: [`docs/ar`](docs/ar) · Research: [`docs/research`](docs/research) (21 source repos analyzed) · Decisions: [`docs/adr`](docs/adr) (ADR-001…020) · Integrations: [`docs/integrations`](docs/integrations) · Provenance: [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) + [`docs/sources/source-manifest.yaml`](docs/sources/source-manifest.yaml)
 
 ## Status
 
-Phase 2–4 of 13 complete (research ✓ architecture ✓ core foundation ✓). Next: setup wizard, model/provider router, MCP/A2A layers, migration apply/rollback. Contributions welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
+Phase 2–4 of 13 complete (research ✓ architecture ✓ core foundation ✓ engines: context/memory/teams/orchestrator ✓). Next: runtime supervisor, notifications, observability ledger queries, A2A adapter. Contributions welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Author
 

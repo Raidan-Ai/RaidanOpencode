@@ -226,3 +226,13 @@ sources:
     integration_type: INSPIRED
     code_copied: false
     reviewed_at: 2026-08-23
+
+  - name: obra/superpowers
+    repository: https://github.com/obra/superpowers
+    license: MIT
+    author: Jesse Vincent (obra)
+    capabilities: [engineering-discipline-skills, brainstorming-workflow, tdd-discipline, plan-execute-loop, subagent-driven-development]
+    integration_type: INTEGRATED
+    code_copied: false
+    notes: optional OpenCode plugin installed via native plugin mechanism at user discretion; dedup check against existing local skills performed before recommending; install guide in docs/integrations/superpowers.md
+    reviewed_at: 2026-08-23

@@ -79,22 +79,39 @@ export class TaskEngine {
     return t;
   }
 
-  transition(id: string, next: TaskState): RaidanTask {
-    const all = this.loadAll();
-    const t = all.find((x) => x.id === id);
-    if (!t) throw new Error(`task not found: ${id}`);
+  private assertCanTransition(all: RaidanTask[], t: RaidanTask, next: TaskState): void {
     if (!TRANSITIONS[t.state].includes(next))
-      throw new Error(`illegal transition ${t.state} -> ${next} for ${id}`);
+      throw new Error(`illegal transition ${t.state} -> ${next} for ${t.id}`);
     for (const dep of t.dependsOn) {
       const d = all.find((x) => x.id === dep);
       if (d && d.state !== "COMPLETED")
         throw new Error(`dependency ${dep} not COMPLETED (${d.state})`);
     }
+  }
+
+  transition(id: string, next: TaskState): RaidanTask {
+    const all = this.loadAll();
+    const t = all.find((x) => x.id === id);
+    if (!t) throw new Error(`task not found: ${id}`);
+    this.assertCanTransition(all, t, next);
     t.state = next;
     t.updatedAt = new Date().toISOString();
     if (next === "RUNNING") { t.attempts += 1; this.bus?.emit("task.started", null, { taskId: id }); }
     if (next === "WAITING") this.bus?.emit("task.waiting", null, { taskId: id });
     if (next === "COMPLETED") this.bus?.emit("task.completed", null, { taskId: id });
+    this.saveAll(all);
+    return t;
+  }
+
+  assign(id: string, agentId: string): RaidanTask {
+    const all = this.loadAll();
+    const t = all.find((x) => x.id === id);
+    if (!t) throw new Error(`task not found: ${id}`);
+    this.assertCanTransition(all, t, "ASSIGNED");
+    t.assigneeAgentId = agentId;
+    t.state = "ASSIGNED";
+    t.updatedAt = new Date().toISOString();
+    this.bus?.emit("task.assigned", { agentId }, { taskId: id });
     this.saveAll(all);
     return t;
   }

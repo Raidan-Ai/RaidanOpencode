@@ -13,8 +13,12 @@ import { PolicyEngine, type PolicyMode } from "../core/policies/engine.js";
 import { ModelRouter, FAILOVER_TRIGGERS } from "../core/gateway/router.js";
 import { McpRegistry } from "../core/mcp/registry.js";
 import { MigrationEngine, inspectOpencode } from "../core/migrate/engine.js";
+import { ContextEngine, CONTEXT_LAYERS, type ContextLayer } from "../core/context/engine.js";
+import { MemoryEngine, MEMORY_TYPES, type MemoryType } from "../core/memory/engine.js";
+import { TeamEngine } from "../core/teams/engine.js";
+import { Orchestrator } from "../core/orchestration/orchestrator.js";
 
-const VERSION = "0.3.0";
+const VERSION = "0.5.0";
 const HOME = homedir();
 const OC_GLOBAL = join(HOME, ".config", "opencode");
 const STATE_DIR = join(HOME, ".raidan");
@@ -25,6 +29,9 @@ function statePaths() {
   return {
     ledger: join(STATE_DIR, "events.jsonl"),
     tasks: join(STATE_DIR, "tasks.json"),
+    contexts: join(STATE_DIR, "contexts.json"),
+    memory: join(STATE_DIR, "memory.json"),
+    teams: join(STATE_DIR, "teams.json"),
   };
 }
 
@@ -142,6 +149,180 @@ taskCmd
     const eng = new TaskEngine(statePaths().tasks);
     for (const t of eng.list(state as never))
       console.log(`${t.id.padEnd(16)} ${t.state.padEnd(10)} ${t.complexity} ${t.title}`);
+  });
+taskCmd
+  .command("assign")
+  .description("assign a task to an agent (CREATED/PLANNED -> ASSIGNED)")
+  .argument("<taskId>")
+  .argument("<agentId>")
+  .action((taskId, agentId) => {
+    const t = new TaskEngine(statePaths().tasks, bus()).assign(taskId, agentId);
+    console.log(`${t.id} -> ${t.assigneeAgentId} [${t.state}]`);
+  });
+
+const ctxEng = () => new ContextEngine(statePaths().contexts, bus());
+const contextCmd = program.command("context").description("context engine (MVI budgets, layered assembly)");
+contextCmd
+  .command("add")
+  .description("register a context entry")
+  .argument("<layer>", CONTEXT_LAYERS.join("|"))
+  .argument("<title>")
+  .requiredOption("--content <text>", "entry body (or use --file)")
+  .option("--file <path>", "load content from a file instead of --content")
+  .option("--priority <n>", "0-10, higher loads first under budget pressure", "5")
+  .option("--tags <t...>", "tags", [])
+  .action((layer, title, opts) => {
+    const content = opts.file ? readFileSync(opts.file, "utf8") : opts.content;
+    const e = ctxEng().upsert({ layer: layer as ContextLayer, title, content, priority: Number(opts.priority), tags: opts.tags });
+    console.log(`${e.id} [${e.layer}] ${e.title}`);
+  });
+contextCmd
+  .command("list")
+  .argument("[layer]", "filter by layer")
+  .action((layer) => {
+    const rows = ctxEng().list(layer as ContextLayer | undefined);
+    if (!rows.length) return console.log("no context entries");
+    for (const e of rows) console.log(`${e.id.padEnd(14)} ${e.layer.padEnd(14)} p=${e.priority} ${e.title}`);
+  });
+contextCmd
+  .command("assemble")
+  .description("pack highest-scoring entries into a token budget (lazy MVI assembly)")
+  .option("--keywords <k...>", "relevance keywords", [])
+  .option("--layers <l...>", "restrict to layers", [])
+  .option("--budget <tokens>", "token budget", "4000")
+  .action((opts) => {
+    const r = ctxEng().assemble({
+      keywords: opts.keywords,
+      layers: opts.layers,
+      budgetTokens: Number(opts.budget),
+    });
+    console.log(`budget=${r.budgetTokens} used=${r.tokensUsed} included=${r.included.length} deferred=${r.deferred.length}`);
+    for (const e of r.included) console.log(`  + ${e.id.padEnd(14)} ${e.layer.padEnd(14)} ${e.title}`);
+    for (const e of r.deferred.slice(0, 5)) console.log(`  - ${e.id.padEnd(14)} ${e.layer.padEnd(14)} ${e.title} (deferred)`);
+  });
+contextCmd
+  .command("remove")
+  .argument("<id>")
+  .action((id) => {
+    if (!ctxEng().remove(id)) { console.error(`not found: ${id}`); process.exitCode = 1; return; }
+    console.log(`removed ${id}`);
+  });
+
+const memEng = () => new MemoryEngine(statePaths().memory, bus());
+const memoryCmd = program.command("memory").description("memory engine (write gates + ranked retrieval)");
+memoryCmd
+  .command("write")
+  .description("write a memory item through policy gates")
+  .argument("<type>", MEMORY_TYPES.join("|"))
+  .argument("<content>")
+  .option("--importance <n>", "0-1", "0.5")
+  .option("--tags <t...>", "tags", [])
+  .option("--force", "bypass long-term importance gate / dedup merge", false)
+  .action((type, content, opts) => {
+    const r = memEng().write(
+      { type: type as MemoryType, content, importance: Number(opts.importance), tags: opts.tags },
+      { force: opts.force },
+    );
+    console.log(`${r.updated ? "merged(existing)" : "written(new)"} ${r.item.id}${r.gateApplied ? ` gate=${r.gateApplied}` : ""}`);
+  });
+memoryCmd
+  .command("search")
+  .description("ranked retrieval (keyword + recency + importance)")
+  .argument("<query>")
+  .option("--type <type>", "filter by memory type")
+  .option("--limit <n>", "max results", "10")
+  .action((query, opts) => {
+    const rows = memEng().search(query, { type: opts.type as MemoryType | undefined, limit: Number(opts.limit) });
+    if (!rows.length) return console.log("no matches");
+    for (const m of rows) console.log(`${m.id.padEnd(14)} ${m.type.padEnd(11)} imp=${m.importance.toFixed(2)} hits=${m.accessCount} ${m.content.slice(0, 80)}`);
+  });
+memoryCmd
+  .command("list")
+  .argument("[type]", "filter by type")
+  .action((type) => {
+    const rows = memEng().list(type as MemoryType | undefined);
+    if (!rows.length) return console.log("memory empty");
+    for (const m of rows) console.log(`${m.id.padEnd(14)} ${m.type.padEnd(11)} imp=${m.importance.toFixed(2)} ${m.content.slice(0, 70)}`);
+  });
+memoryCmd
+  .command("forget")
+  .argument("<id>")
+  .action((id) => {
+    if (!memEng().forget(id)) { console.error(`not found: ${id}`); process.exitCode = 1; return; }
+    console.log(`forgot ${id}`);
+  });
+
+const teamEng = () => new TeamEngine(statePaths().teams, bus());
+const teamCmd = program.command("team").description("team engine (org tree, membership, delegation)");
+teamCmd
+  .command("create")
+  .argument("<name>")
+  .option("--parent <teamId>", "parent team id")
+  .action((name, opts) => {
+    const t = teamEng().create(name, { parentId: opts.parent });
+    console.log(`${t.id} "${t.name}"${t.parentId ? ` (child of ${t.parentId})` : ""}`);
+  });
+teamCmd.command("list").action(() => {
+  const rows = teamEng().list();
+  if (!rows.length) return console.log("no teams yet");
+  for (const t of rows)
+    console.log(`${t.id.padEnd(18)} ${t.name.padEnd(24)} members=${t.memberAgentIds.length}${t.leadAgentId ? ` lead=${t.leadAgentId}` : ""}${t.parentId ? ` parent=${t.parentId}` : ""}`);
+});
+teamCmd
+  .command("inspect")
+  .argument("<teamId>")
+  .action((teamId) => {
+    const eng = teamEng();
+    const t = eng.get(teamId);
+    if (!t) { console.error(`team not found: ${teamId}`); process.exitCode = 1; return; }
+    console.log(JSON.stringify({ ...t, escalationPath: eng.escalationPath(teamId) }, null, 2));
+  });
+teamCmd
+  .command("add-member")
+  .argument("<teamId>")
+  .argument("<agentId>")
+  .action((teamId, agentId) => {
+    const t = teamEng().addMember(teamId, agentId);
+    console.log(`${agentId} joined ${t.id} (${t.memberAgentIds.length} members)`);
+  });
+teamCmd
+  .command("set-lead")
+  .argument("<teamId>")
+  .argument("<agentId>")
+  .action((teamId, agentId) => {
+    const t = teamEng().setLead(teamId, agentId);
+    console.log(`lead of ${t.id} is now ${t.leadAgentId}`);
+  });
+
+const orchCmd = program.command("orchestrate").description("canonical orchestrator (single orchestration layer)");
+orchCmd
+  .command("plan")
+  .description("classify complexity L0-L4 and create a routed plan + task")
+  .argument("<goal>")
+  .option("--caps <c...>", "capability requirements for agent suggestion", [])
+  .option("--assign <agentId>", "immediately assign the created task")
+  .action((goal, opts) => {
+    const agentsDir = opencodeDirs();
+    const orch = new Orchestrator(
+      new TaskEngine(statePaths().tasks, bus()),
+      bus(),
+      () => new AgentRegistry(agentsDir).list(),
+    );
+    const r = orch.plan(goal, { capabilities: opts.caps });
+    console.log(`complexity : ${r.classification.level} (score=${r.classification.score}${r.classification.explicit ? ", explicit" : ""})`);
+    if (r.classification.signals.length) console.log(`signals    : ${r.classification.signals.join("; ")}`);
+    console.log(`route      : ${r.plan.mode} — ${r.plan.rationale}`);
+    console.log(`steps      : ${r.plan.steps.join(" → ")}`);
+    console.log(`agents     : max parallel ${r.plan.maxParallelAgents}, approval ${r.plan.approvalRequired ? "REQUIRED" : "not required"}`);
+    console.log(`task       : ${r.taskId} [${r.taskState}]`);
+    if (r.suggestedAgents?.length) {
+      console.log("candidates :");
+      for (const s of r.suggestedAgents) console.log(`  ${s.id.padEnd(28)} match=${s.matchScore}`);
+    }
+    if (opts.assign) {
+      const t = orch.assign(r.taskId, opts.assign);
+      console.log(`assigned   : ${t.id} -> ${t.assigneeAgentId}`);
+    }
   });
 
 const skillCmd = program.command("skill").description("skill registry operations");

@@ -15,6 +15,7 @@ RaidanOpencode is an independent open-source project inspired by, and where lega
 | Component | License | Source | Usage |
 |---|---|---|---|
 | ponytail (@dietrichgebert/ponytail OpenCode plugin) | MIT | https://github.com/DietrichGebert/ponytail | optional minimal-code policy layer; installed via OpenCode plugin mechanism, not vendored here |
+| superpowers (obra/superpowers OpenCode plugin) | MIT (c) 2025 Jesse Vincent | https://github.com/obra/superpowers | optional engineering-discipline skill suite (brainstorming, TDD, plan-execute); installed via OpenCode native plugin mechanism at user discretion, not vendored here; see docs/integrations/superpowers.md |
 
 ## Concepts adapted (no code copied)
 

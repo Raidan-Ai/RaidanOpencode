@@ -1,6 +1,6 @@
 {
   "name": "raidan-opencode",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "RaidanOpencode — Unified AI Agent Engineering Operating System for OpenCode",
   "author": {
     "name": "Raidan Ameen",
@@ -22,7 +22,7 @@
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "test": "npm run build && node --test dist/tests/core.test.js dist/tests/gateway-mcp.test.js",
+    "test": "npm run build && node --test dist/tests/core.test.js dist/tests/gateway-mcp.test.js dist/tests/engines.test.js",
     "smoke": "node dist/src/cli/index.js --version && node dist/src/cli/index.js doctor",
     "cli": "node dist/src/cli/index.js"
   },
