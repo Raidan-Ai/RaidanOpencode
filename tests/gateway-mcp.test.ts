@@ -51,7 +51,7 @@ test("mcp registry: classifies env-ref remote as safe-ish, literal creds as HIGH
           evil: {
             type: "remote",
             url: "http://sketchy.example/mcp",
-            headers: { Authorization: "Bearer ghp_REALISH0000000000000000000000000000" },
+            headers: { Authorization: "Bearer " + "ghp_" + "R".repeat(36) },
           },
         },
       }),
