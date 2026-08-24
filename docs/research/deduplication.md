@@ -1,152 +1,65 @@
-# Deduplication Matrix
+# Deduplication Record — One Canonical Subsystem Per Concern
 
-Date: 2026-08-23
-Rule: exactly ONE canonical implementation per capability. References inform; they do not ship.
+**Date:** 2026-08-24 · **Enforces:** master-prompt invariants (§1/§46) and ADR-002/003.
+**Decision vocabulary:** REUSE · EXTEND · MERGE · SPECIALIZE · CREATE (never duplicate).
+
+> This document is the authoritative answer to "why does X exist once?".
+> `repository-analysis.md` §3 doubles as the integration map — no separate file is maintained (doc-level deduplication).
 
 ---
 
-### Agent Registry
-- **Primary:** Raidan Agent Registry (`core/agents`)
-- References: OpenAgentsControl markdown agents; oh-my-openagent discipline roster; kandev 21-agent breadth
-- Rejected: vendoring any external agent roster wholesale
-- Reason: agents must be first-class schema objects (capabilities/models/policies), not prompt blobs
+## Invariant Register
 
-### Team Engine
-- **Primary:** Raidan Team Engine (`core/teams`)
-- References: kandev Office mode; agent-teams-ai org hierarchy (design-only, AGPL); AI Maestro teams/war-room
-- Rejected: separate team dashboards/managers (Agent Deck, Agent Manager, Squid as team systems)
-- Reason: teams are data + policy, UI comes later from ONE Control Center
+| # | Canonical subsystem | Owner (path) | Status | Primary pattern source | Secondary inspirations | REJECTED | Reason |
+|---|---|---|---|---|---|---|---|
+| 1 | **Orchestrator** | `src/core/orchestration` | scaffolded | opencode-swarm gated pipeline | OpenAgentsControl plan→approve→execute; deer-flow lead-agent graph; agent-orchestrator daemon model | Absorbing ruflo / agentic-flow / kandev orchestrators | Each imports a competing control plane; upstream roadmaps would couple to ours |
+| 2 | **Task Engine** | `src/core/tasks` | scaffolded | 5dive shared SQLite backlog | agx constant-cost checkpoints; deer-flow leases + delivery receipts; agent-teams-ai budgets/stall-resume | kandev board as state store; Notion Tasks DB as runtime state | AGPL boundary; ownership rule — Notion governs, kernel executes |
+| 3 | **Team/Swarm Engine** | `src/core/teams` | scaffolded | agent-teams-ai org nesting (concept) | oh-my-openagent Team Mode tools; ruflo topologies (mesh/hierarchical) | ruflo swarm runtime; standalone team plugins | Minimum-sufficient-team must be policy-driven inside OUR kernel |
+| 4 | **Session Manager** | `src/core/sessions` (planned) | planned | agent-deck primitive set | comet CRDT ledger + steering mailbox; clideck signal-watching; agent-of-empires reboot-safe resume; agent-manager tmux namespace | Shipping agent-deck/console/manager as-is | All tmux-bound or provider-narrow; violates Windows-first |
+| 5 | **Agent Registry** | `src/core/agents` | exists | OpenAgentsControl editable agents | oh-my-openagent agent roster + contracts; kandev role≠implementation | Per-runtime duplicate registries | Hidden registries forbidden (§113) |
+| 6 | **Capability Model + Router** | `src/core/routing` (planned) | planned | oh-my-openagent category-based routing | kandev per-step agent selection; agent-orchestrator fact-derived status | Name-based agent matching | Explicitly superseded by capability-first routing (master spec §11) |
+| 7 | **Model Router / AI Gateway** | `src/core/gateway` | exists | oh-my-openagent caller-never-picks-model | ruflo multi-provider failover; deer-flow provider catalog; existing omiroute-local gateway | New second gateway beside existing local gateway | §33: build policy ON TOP of current provider infra |
+| 8 | **Context Engine** | `src/core/context` | exists | OpenAgentsControl MVI discipline | opencode-swarm context-budget guard (0.7/0.9 thresholds); deer-flow compaction | Whole-codebase injection patterns | Token waste is the #1 measured failure mode |
+| 9 | **Memory Engine** | `src/core/memory` | exists | 5dive durable memory + provenance | ai-maestro CozoDB layers; deer-flow long-term store; ruflo AgentDB (concept) | Vector DB by default; Postgres/Redis defaults | §49/§103: smallest durable local state first |
+| 10 | **Skill Registry** | `src/core/skills` + user inventory | exists (1,566 installed) | OpenCode native skill model | agent-deck Skills Manager; ponytail pack format | Installing duplicate skills per source repo | §47/§50: dedupe before install; compare actual capabilities |
+| 11 | **MCP Registry** | `src/core/mcp` | exists | agent-deck socket-pool governance | kandev bidirectional MCP; oh-my-openagent ephemeral skill-MCPs | Forking MCP servers; parallel MCP universes | §45: govern native OpenCode MCP, don't compete with it |
+| 12 | **A2A Layer** | `integrations/a2a` (planned) | planned | ai-maestro AMP signed messages | agent-manager MCP spawn/message/wait tools | Using A2A for tool access; using MCP for agent↔agent | Protocol confusion forbidden (§44): MCP=agent↔tools, A2A=agent↔agent |
+| 13 | **Policy Engine** | `src/core/policies` | exists | opencode-swarm file-authority + scope-TTL + shell-write AST detection | 5dive isolation tiers; OpenAgentsControl approval-before-write | Per-agent ad-hoc permission logic | Centralized evaluation is the whole point (§82) |
+| 14 | **Approval Engine** | within `policies` | planned | 5dive human-escalation-only-on-decision | agx approve/reject at irreversible steps; OpenAgentsControl gates | Auto-approve modes without policy | Human control is configurable but never bypassable |
+| 15 | **Review Engine** | `core/review` (planned) | planned | opencode-swarm critic→coder→reviewer→test_engineer gates | kandev review workspace; agent-manager diff-comment round-trip | External review bots as parallel pipelines | Gates must live inside the ONE kernel (§38) |
+| 16 | **Runtime Supervisor** | `core/runtime` (planned) | planned | comet Harness trait + process ownership | 5dive systemd users (Linux backend); kandev executors (local/Docker/SSH); clideck PTY handling | systemd-only design; tmux dependency | §12/§100: abstract supervisor, Windows/Linux backends equal |
+| 17 | **Worktree Manager** | `core/worktrees` (planned) | planned | agent-deck sparse-checkout + hooks | opencode-swarm disjoint-file grouping; agx branch-per-task; kandev multi-repo | Uncontrolled shared-write parallelism | Conflict prevention requires managed lifecycle |
+| 18 | **Event Kernel** | `src/core/events` | exists | deer-flow run events | swarm plan-ledger (jsonl audit trail) | Heavyweight broker (Kafka/NATS) by default | §103: internal bus first |
+| 19 | **Observability** | `src/core/observability` (planned) | planned | deer-flow tracing integrations (OTel-compatible shape) | agent-teams-ai token analytics; squid lane stats | Mandatory external platform | Local-first; OTel optional adapter |
+| 20 | **Notification Engine** | `core/notifications` (planned) | planned | agent-deck Telegram/Slack bridges | deer-flow IM channels; 5dive Telegram escalation | Notification channel per source repo | One abstraction, pluggable providers |
+| 21 | **Evaluation Engine** | `core/evaluation` (planned) | planned | OpenAgentsControl evals/ harness | ponytail benchmark methodology (LOC/cost deltas) | Vibes-based promotion | Evidence-gated promotion only (§73) |
+| 22 | **Migration Engine** | `src/core/migrate` | exists | (internal) | agx checkpoint portability; comet export shapes | Blind overwrite migrators | §140: parse→compare→plan→backup→merge |
+| 23 | **Config Manager** | `src/core/config` | exists | oh-my-openagent config walk-up (closest wins) | agent-deck declarative groups | Second config system beside OpenCode's | §74: respect native precedence, layer safely |
+| 24 | **Setup Wizard** | `apps/cli/setup` (planned) | planned | (master spec §122 flow) | kandev profile composition | Install-everything defaults | Default profile stays minimal (§131) |
+| 25 | **CLI** | `src/cli` | scaffolded | (existing `raidan` bin) | agent-deck/agent-manager command ergonomics | Multiple CLIs per subsystem | ONE CLI (§46) |
+| 26 | **Control Center** | `apps/control-center` | deferred-view | agent-of-empires web/API/ACP surface | nimbalyst GUI; agent-teams-ai kanban; squid SSE dashboard | Several dashboards with separate state | UI reads the same API; zero business logic (§68) |
+| 27 | **Connectors** | `integrations/notion` ✅ | shipped | (internal) | deer-flow IM adapters (pattern) | Connector-per-vendor duplication | Registry + least privilege (§87) |
+| 28 | **Hooks System** | `core/hooks` (planned) | planned | oh-my-openagent 54-hook taxonomy (individual disable flags) | OpenAgentsControl plugin points | Untogglable monolithic hook packs | Granular enable/disable is a measured need |
+| 29 | **Prompt Compiler** | `core/prompts` (planned) | planned | ponytail fragment-injection economics | OpenAgentsControl instruction layering | Duplicated directives across agent files | Measured −54% LOC shows fragment value |
+| 30 | **Terminal Abstraction** | within `runtime` | planned | clideck PTY + status-signals (cross-OS proof) | kandev ConPTY usage | tmux as hard dependency | Windows-first (ADR-014) |
+| 31 | **Search Providers** | `core/search` (planned) | planned | (gap — no source covers well) | deer-flow/oh-my-openagent websearch MCPs | Bundling one vendor SDK | Fallback routing needs abstraction |
+| 32 | **Sandboxing** | within `policies`/`runtime` | planned | 5dive three isolation tiers | deer-flow sandbox providers; aofe Docker/Podman | K8s-first sandboxing | Local-first escalation path |
 
-### Task Engine
-- **Primary:** Raidan Task Engine (`core/tasks`, SQLite)
-- References: 5dive DIVE queue; agx ticket pipeline; kandev kanban automation
-- Rejected: Jira/Linear-style external importers as core (adapters only)
-- Reason: single state machine CREATED→…→COMPLETED with failure ladder
+---
 
-### Workflow Engine
-- **Primary:** Raidan Workflow Engine (`core/workflows`, YAML declarative)
-- References: kandev portable workflow YAML; deer-flow scheduled tasks; ECC gated pipelines
-- Rejected: embedding LangGraph/CrewAI runtimes
-- Reason: workflows must run on OpenCode primitives, not a second runtime
+## Rejection Ledger (permanent record — do not revisit without new evidence)
 
-### Orchestrator
-- **Primary:** Raidan Orchestrator (`core/orchestration`) — complexity classifier L0–L4 + gated pipeline
-- References: opencode-swarm architect-led gates; agent-orchestrator planner/worker split; deer-flow goal-evaluator; 5dive Council
-- Rejected: ruflo/agentic-flow harness adoption; multiple concurrent orchestrators
-- Reason: anti-Agent-Theater; one brain decides execution shape
+| Rejected | Why | Reconsider only if |
+|---|---|---|
+| ruflo as dependency | Claude/Codex-hardwired competing control plane; scope = our entire OS | Never as engine; federation/trust-scoring concepts may inform Phase 10 study |
+| agentic-flow as dependency | No LICENSE file despite MIT claim; alpha hygiene; Claude-bound | After license verification AND multi-runtime refactor |
+| agent-console | Two-provider scope, no OpenCode, maturity << peers | If it adds OpenCode + grows a maintainer community |
+| Wholesale vendoring of opencode-swarm | 120MB v7.x plugin; roadmap coupling | Its MIT license permits targeted extraction if a primitive proves too costly to reimplement |
+| Notion as task/runtime store | Ownership boundary (ADR-021) | Never — boundary is architectural |
+| tmux as required dependency | Breaks native Windows (our differentiator) | Only as optional Linux convenience backend behind TerminalAdapter |
 
-### Capability Router (agent selection)
-- **Primary:** Raidan Capability Router (`core/routing/capability.ts`)
-- References: opencode-swarm role assignment; squid lane grammar
-- Rejected: keyword-only routers
-- Reason: capability-driven matching beats name matching
+## Doc-Level Deduplication
 
-### Model Router
-- **Primary:** Raidan Model Router (`core/gateway/model-router.ts`)
-- References: opencode-swarm per-role models + fallback chains; agentic-flow cost/quality routing; awesome-opencode tier fingerprints
-- Rejected: hard-coded model names inside agents
-- Reason: agents declare needs ("reasoning", "vision"); router resolves provider/model
-
-### Provider Router + AI Gateway
-- **Primary:** Raidan Gateway (`core/gateway`)
-- References: user's existing OmniRoute proxy (localhost:20128) treated as just another provider; 5dive BYO base-url
-- Rejected: building a second LiteLLM/OmniRoute clone
-- Reason: compose with existing local gateway; Raidan adds policy/health/cost metadata around it
-
-### Context Engine
-- **Primary:** Raidan Context Engine (`core/context`) — MVI budgets, lazy load, local-wins
-- References: OpenAgentsControl context system + ContextScout algorithm (MIT, liftable); ECC contexts/
-- Rejected: whole-codebase prompting; eager skill-body loading
-- Reason: token efficiency is a product requirement
-
-### Memory Engine
-- **Primary:** Raidan Memory Engine (`core/memory`; filesystem → SQLite backend)
-- References: deer-flow DeerMem scope/durability write-gates; 5dive provenance memory; agx checkpoint resume
-- Rejected: mandatory vector DB; dump-all-history context stuffing
-- Reason: local-first; ranking beats storage volume
-
-### Skill Registry
-- **Primary:** Raidan Skill Registry (`skills/` + AGENT_SKILL_REGISTRY.yaml)
-- References: ECC install-state ownership manifest; omni-skills pinned-commit lockfile (pattern only — unlicensed content excluded); mattpocock never-double-install rule
-- Rejected: bulk-importing 286 ECC skills or 108 awesome-opencode agents
-- Reason: dedupe-first; curated > comprehensive
-
-### MCP Registry
-- **Primary:** Raidan MCP Registry (`integrations/mcp`) governing native OpenCode `"mcp"` config
-- References: agent-deck MCP Manager + socket pool (concept); user's existing github remote MCP
-- Rejected: second MCP client implementation
-- Reason: OpenCode IS the MCP client; Raidan adds governance (provenance, risk rating, health)
-
-### A2A Adapter
-- **Primary:** Raidan A2A adapter (`integrations/a2a`) — v1.0.0 HTTP+JSON binding
-- References: none in ecosystem (everyone uses proprietary protocols or ACP)
-- Rejected: AMP/AID/AAP (proprietary lock-in), collapsing A2A into MCP
-- Reason: standards-based external interop; MCP stays tool-plane, A2A stays agent-plane
-
-### Policy Engine
-- **Primary:** Raidan Policy Engine (`core/policies`)
-- References: OpenCode permission system (native choke point); opencode-swarm authority.rules + circuit breakers; bash-guard ask-not-deny; 5dive isolation tiers
-- Rejected: replacing native OpenCode permissions
-- Reason: augment, don't duplicate — intercept permission.asked events
-
-### Runtime Supervisor
-- **Primary:** Raidan Runtime Supervisor (`core/runtime`) w/ backend SPI
-- Backends: windows-native, linux-native, systemd (optional), docker (optional), wsl (bridge)
-- References: 5dive systemd model; comet daemon watchdogs; agent-deck tmux hosting
-- Rejected: systemd/tmux as hard dependencies
-- Reason: Windows-first portability mandate
-
-### Event Bus
-- **Primary:** In-process typed event bus persisted to JSONL (`core/events`)
-- References: opencode-swarm AutomationEventBus; OpenCode SSE `/event` stream
-- Rejected: Kafka/RabbitMQ/Redis until scale demands
-- Reason: zero-infra local operation
-
-### Notification Engine
-- **Primary:** Raidan Notification Engine (`core/notifications`)
-- Providers: terminal, desktop, webhook, Telegram (opt-in, policy-gated)
-- References: agent-deck bridge.py; 5dive tap-to-answer gates
-- Rejected: giving chat channels shell authority
-- Reason: notifications are read-mostly; approvals flow through Policy Engine
-
-### Observability Engine
-- **Primary:** Raidan Observability (`core/observability`) — run ledger JSONL + cost accounting
-- References: squid per-prompt cost attribution; comet replayable journals; ruflo cost-tracker
-- Rejected: mandatory OTel collector; logging secrets/prompts verbatim by default
-- Reason: privacy + simplicity; OTel = optional export
-
-### Evaluation Engine
-- **Primary:** Raidan Eval Engine (`core/evaluation`)
-- References: OpenAgentsControl evals dir; ECC verify loops; deer-flow tracing hooks
-- Rejected: LLM-judge-only quality gates
-- Reason: deterministic checks first, judges second
-
-### Migration Engine
-- **Primary:** Raidan Migration Engine (`apps/cli/migrate`) — inspect/plan/backup/apply/verify/rollback, dry-run default
-- References: ECC doctor/repair/uninstall --dry-run; opencode-swarm update cache-clearing lessons
-- Rejected: silent config rewrites
-- Reason: preserve-user-state doctrine
-
-### Configuration Manager
-- **Primary:** Raidan Config Manager (`core/config`) — layered raidan.config.yaml + env refs
-- References: OpenCode merge precedence (verified); agent-deck precedence chain
-- Rejected: secrets in YAML literals ({env:}/{file:} references only)
-- Reason: verified OpenCode behavior is the substrate we extend
-
-### Setup Wizard
-- **Primary:** `raidan init` interactive wizard (`apps/cli/setup`)
-- References: deer-flow make setup wizard; agx init; ECC profiles
-- Rejected: 100-option mega-prompts (progressive disclosure instead)
-- Reason: onboarding friction kills adoption
-
-### CLI
-- **Primary:** `raidan` CLI (`apps/cli`)
-- References: command surface per master spec §70
-- Rejected: GUI-first operation; multiple CLIs
-- Reason: CLI is the stable contract; Control Center reads same state
-
-### Control Center
-- **Primary:** Single web dashboard (`apps/control-center`, scaffold in v1)
-- References: agent-orchestrator fact-derived kanban (concept); nimbalyst extension SDK; kandev SPA
-- Rejected: Electron monolith; multiple dashboards
-- Reason: state lives in core; UI is a view
+- `repository-analysis.md` §3 = integration map (no separate `integration-map.md`).
+- License findings live in `repository-analysis.md` §2 (no separate license file until legal audit expands).
+- This file supersedes any per-PR ad-hoc dedup notes.
