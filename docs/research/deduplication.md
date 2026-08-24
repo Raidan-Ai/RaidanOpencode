@@ -4,7 +4,10 @@
 **Decision vocabulary:** REUSE · EXTEND · MERGE · SPECIALIZE · CREATE (never duplicate).
 
 > This document is the authoritative answer to "why does X exist once?".
-> `repository-analysis.md` §3 doubles as the integration map — no separate file is maintained (doc-level deduplication).
+> Companion docs: `integration-map.md` (source→component routing), `repository-analysis.md`
+> (per-source detail + license findings §2 + extraction patterns §3). Those three plus
+> `capability-matrix.md` form the complete Phase 1 record — no overlapping duplicates are
+> maintained between them.
 
 ---
 
@@ -21,7 +24,7 @@
 | 7 | **Model Router / AI Gateway** | `src/core/gateway` | exists | oh-my-openagent caller-never-picks-model | ruflo multi-provider failover; deer-flow provider catalog; existing omiroute-local gateway | New second gateway beside existing local gateway | §33: build policy ON TOP of current provider infra |
 | 8 | **Context Engine** | `src/core/context` | exists | OpenAgentsControl MVI discipline | opencode-swarm context-budget guard (0.7/0.9 thresholds); deer-flow compaction | Whole-codebase injection patterns | Token waste is the #1 measured failure mode |
 | 9 | **Memory Engine** | `src/core/memory` | exists | 5dive durable memory + provenance | ai-maestro CozoDB layers; deer-flow long-term store; ruflo AgentDB (concept) | Vector DB by default; Postgres/Redis defaults | §49/§103: smallest durable local state first |
-| 10 | **Skill Registry** | `src/core/skills` + user inventory | exists (1,566 installed) | OpenCode native skill model | agent-deck Skills Manager; ponytail pack format | Installing duplicate skills per source repo | §47/§50: dedupe before install; compare actual capabilities |
+| 10 | **Skill Registry** | `src/core/skills` + user inventory | exists (1,565 installed) | OpenCode native skill model | agent-deck Skills Manager; ponytail pack format | Installing duplicate skills per source repo | §47/§50: dedupe before install; compare actual capabilities |
 | 11 | **MCP Registry** | `src/core/mcp` | exists | agent-deck socket-pool governance | kandev bidirectional MCP; oh-my-openagent ephemeral skill-MCPs | Forking MCP servers; parallel MCP universes | §45: govern native OpenCode MCP, don't compete with it |
 | 12 | **A2A Layer** | `integrations/a2a` (planned) | planned | ai-maestro AMP signed messages | agent-manager MCP spawn/message/wait tools | Using A2A for tool access; using MCP for agent↔agent | Protocol confusion forbidden (§44): MCP=agent↔tools, A2A=agent↔agent |
 | 13 | **Policy Engine** | `src/core/policies` | exists | opencode-swarm file-authority + scope-TTL + shell-write AST detection | 5dive isolation tiers; OpenAgentsControl approval-before-write | Per-agent ad-hoc permission logic | Centralized evaluation is the whole point (§82) |
@@ -60,6 +63,8 @@
 
 ## Doc-Level Deduplication
 
-- `repository-analysis.md` §3 = integration map (no separate `integration-map.md`).
-- License findings live in `repository-analysis.md` §2 (no separate license file until legal audit expands).
-- This file supersedes any per-PR ad-hoc dedup notes.
+- `repository-analysis.md` = per-source analysis + license findings (§2) + extraction patterns (§3).
+- `integration-map.md` = source→capability→component routing (pre-existing, remains canonical for that view).
+- `capability-matrix.md` = ontology coverage across sources.
+- This file = subsystem uniqueness decisions + rejection ledger.
+- No content is duplicated between them; each links rather than copies.
