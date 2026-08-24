@@ -1,0 +1,10 @@
+{
+  "$comment": "EXAMPLE ONLY — merge the 'mcp' block into your opencode.json(c). No secrets belong in this file. The server reads OPENAPI_MCP_HEADERS from your environment.",
+  "mcp": {
+    "notion": {
+      "type": "local",
+      "command": ["npx", "-y", "@notionhq/notion-mcp-server"],
+      "enabled": true
+    }
+  }
+}
