@@ -4,6 +4,8 @@ import { dirname, join } from "node:path";
 export type RaidanEventName =
   | "agent.created"
   | "agent.started"
+  | "agent.stopped"
+  | "agent.restarted"
   | "agent.failed"
   | "agent.completed"
   | "task.created"
