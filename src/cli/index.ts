@@ -17,8 +17,11 @@ import { ContextEngine, CONTEXT_LAYERS, type ContextLayer } from "../core/contex
 import { MemoryEngine, MEMORY_TYPES, type MemoryType } from "../core/memory/engine.js";
 import { TeamEngine } from "../core/teams/engine.js";
 import { Orchestrator } from "../core/orchestration/orchestrator.js";
+import { RuntimeSupervisor } from "../core/runtime/supervisor.js";
+import { NotificationEngine, NOTIFY_LEVELS, type NotifyLevel } from "../core/notifications/engine.js";
+import { LedgerQuery } from "../core/observability/query.js";
 
-const VERSION = "0.5.0";
+const VERSION = "0.6.0";
 const HOME = homedir();
 const OC_GLOBAL = join(HOME, ".config", "opencode");
 const STATE_DIR = join(HOME, ".raidan");
@@ -32,6 +35,8 @@ function statePaths() {
     contexts: join(STATE_DIR, "contexts.json"),
     memory: join(STATE_DIR, "memory.json"),
     teams: join(STATE_DIR, "teams.json"),
+    processes: join(STATE_DIR, "processes.json"),
+    runsDir: join(STATE_DIR, "runs"),
   };
 }
 
@@ -292,6 +297,97 @@ teamCmd
   .action((teamId, agentId) => {
     const t = teamEng().setLead(teamId, agentId);
     console.log(`lead of ${t.id} is now ${t.leadAgentId}`);
+  });
+
+const runtimeCmd = program.command("runtime").description("runtime supervisor — native process backend");
+const sup = () => new RuntimeSupervisor(statePaths().processes, statePaths().runsDir, bus());
+runtimeCmd
+  .command("start")
+  .description("start a supervised process: runtime start <id> -- <cmd...> (use -- so flags like -e pass through)")
+  .argument("<id>")
+  .argument("<cmd...>", "command + args to run")
+  .option("--auto-restart", "respawn on crash (max 3)", false)
+  .action((id, cmd, opts) => {
+    const p = sup().start(id, cmd[0], cmd.slice(1), { autoRestart: opts.autoRestart });
+    console.log(`${p.id} RUNNING pid=${p.pid} log=${p.logFile}`);
+  });
+runtimeCmd
+  .command("stop")
+  .argument("<id>")
+  .action(async (id) => {
+    const p = await sup().stop(id);
+    console.log(`${p.id} STOPPED`);
+  });
+runtimeCmd
+  .command("restart")
+  .argument("<id>")
+  .action(async (id) => {
+    const p = await sup().restart(id);
+    console.log(`${p.id} ${p.state} pid=${p.pid} restarts=${p.restarts}`);
+  });
+runtimeCmd
+  .command("status")
+  .argument("[id]", "single process (default: all)")
+  .action((id) => {
+    const rows = id ? [sup().refresh().find((p) => p.id === id)!].filter(Boolean) : sup().refresh();
+    if (!rows.length) return console.log(id ? `process not found: ${id}` : "no supervised processes");
+    for (const p of rows)
+      console.log(
+        `${p.id.padEnd(18)} ${p.state.padEnd(8)} pid=${p.pid ?? "-"} restarts=${p.restarts}${p.autoRestart ? " auto" : ""} ${p.command}`,
+      );
+  });
+runtimeCmd
+  .command("log")
+  .argument("<id>")
+  .option("--lines <n>", "tail size", "30")
+  .action((id, opts) => {
+    console.log(sup().tailLog(id, Number(opts.lines)));
+  });
+
+const notifyCmd = program.command("notify").description("notification engine");
+notifyCmd
+  .command("send")
+  .description("send through gated channels: terminal always; webhook/desktop when configured")
+  .argument("<title>")
+  .requiredOption("--level <level>", NOTIFY_LEVELS.join("|"))
+  .option("--body <text>")
+  .option("--webhook <url>", "POST JSON payload to this URL")
+  .action(async (title, opts) => {
+    const eng = new NotificationEngine({ webhookUrl: opts.webhook });
+    const results = await eng.send({ level: opts.level as NotifyLevel, title, body: opts.body });
+    for (const r of results)
+      console.log(`${r.channel.padEnd(10)} ${r.ok ? "sent" : `failed: ${r.error}`}`);
+  });
+
+program
+  .command("logs")
+  .description("query the observability ledger (~/.raidan/events.jsonl)")
+  .option("--name <event>", "filter by event name")
+  .option("--task <taskId>")
+  .option("--agent <agentId>")
+  .option("--limit <n>", "last N events", "50")
+  .action((opts) => {
+    const rows = new LedgerQuery(statePaths().ledger).all({
+      name: opts.name,
+      taskId: opts.task,
+      agentId: opts.agent,
+      limit: Number(opts.limit),
+    });
+    if (!rows.length) return console.log("no matching events");
+    for (const e of rows) {
+      const ref = e.taskId ? ` task=${e.taskId}` : e.agentId ? ` agent=${e.agentId}` : "";
+      console.log(`${e.ts} ${e.name.padEnd(20)}${ref}`);
+    }
+  });
+
+program
+  .command("trace")
+  .description("reconstruct the ordered event trail of one task")
+  .argument("<taskId>")
+  .action((taskId) => {
+    const rows = new LedgerQuery(statePaths().ledger).trace(taskId);
+    if (!rows.length) return console.log(`no events for ${taskId}`);
+    for (const e of rows) console.log(`${e.ts} ${e.name}${e.data ? ` ${JSON.stringify(e.data)}` : ""}`);
   });
 
 const orchCmd = program.command("orchestrate").description("canonical orchestrator (single orchestration layer)");

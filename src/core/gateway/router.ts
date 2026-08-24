@@ -10,6 +10,12 @@ export type Capability =
   | "vision" | "audio" | "tool-calling" | "structured-output"
   | "long-context" | "embedding" | "reranking";
 
+export const CAPABILITIES = [
+  "coding", "reasoning", "fast", "cheap", "research",
+  "vision", "audio", "tool-calling", "structured-output",
+  "long-context", "embedding", "reranking",
+] as const satisfies readonly Capability[];
+
 export interface ModelEntry {
   id: string;            // provider/model-id (OpenCode convention)
   provider: string;
