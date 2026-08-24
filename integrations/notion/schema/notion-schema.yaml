@@ -1,0 +1,155 @@
+# RaidanOpencode — Notion Schema (canonical declaration)
+#
+# This file is the human-readable source of truth for the Notion thinking-system layout.
+# The bootstrap scripts embed the v0 subset below (kept in sync manually until the
+# schema manager lands). Property types: title, rich_text, url, date, number, checkbox, select.
+#
+# Conventions:
+#   * Every database's title property is exactly "Name" (uniform filtering).
+#   * Select options use UPPERCASE states aligned with docs/en state machines.
+#   * v0 has NO relations (roadmap v1). Do not hand-add relations expecting sync support.
+
+version: 0
+root_page_title: Opencode
+managed_by: RaidanOpencode
+idempotency: title-lookup-before-create
+
+databases:
+  - name: Projects
+    properties:
+      Name: { type: title }
+      Status: { type: select, options: [PLANNED, ACTIVE, PAUSED, COMPLETED, ARCHIVED] }
+      Phase: { type: select, options: [DISCOVERY, RESEARCH, ARCHITECTURE, IMPLEMENTATION, VALIDATION, RELEASE, OPERATIONS] }
+      Priority: { type: select, options: [P0, P1, P2, P3] }
+      Vision: { type: rich_text }
+      Repository: { type: url }
+
+  - name: Objectives
+    properties:
+      Name: { type: title }
+      Status: { type: select, options: [OPEN, IN_PROGRESS, DONE, BLOCKED] }
+      Priority: { type: select, options: [P0, P1, P2, P3] }
+      Project: { type: rich_text }
+      SuccessMetric: { type: rich_text }
+
+  - name: Requirements
+    properties:
+      Name: { type: title }
+      Type: { type: select, options: [FUNCTIONAL, NON_FUNCTIONAL, SECURITY, PERFORMANCE, GOVERNANCE] }
+      Status: { type: select, options: [PROPOSED, ACCEPTED, REJECTED, IMPLEMENTED] }
+      Priority: { type: select, options: [P0, P1, P2, P3] }
+      AcceptanceCriteria: { type: rich_text }
+
+  - name: Epics
+    properties:
+      Name: { type: title }
+      Status: { type: select, options: [BACKLOG, ACTIVE, DONE] }
+      Phase: { type: select, options: [DISCOVERY, RESEARCH, ARCHITECTURE, IMPLEMENTATION, VALIDATION, RELEASE, OPERATIONS] }
+
+  - name: Milestones
+    properties:
+      Name: { type: title }
+      Status: { type: select, options: [PLANNED, IN_PROGRESS, DONE, MISSED] }
+      Deadline: { type: date }
+      Goal: { type: rich_text }
+
+  - name: Tasks
+    properties:
+      Name: { type: title }
+      Status: { type: select, options: [BACKLOG, PLANNED, READY, RUNNING, WAITING, BLOCKED, REVIEW, APPROVAL, DONE, FAILED, CANCELLED] }
+      Priority: { type: select, options: [P0, P1, P2, P3] }
+      Epic: { type: rich_text }
+      Notes: { type: rich_text }
+
+  - name: Decisions (ADR)
+    properties:
+      Name: { type: title }
+      ADR_ID: { type: rich_text }
+      Status: { type: select, options: [PROPOSED, ACCEPTED, SUPERSEDED, REJECTED] }
+      Context: { type: rich_text }
+      Decision: { type: rich_text }
+
+  - name: Risks
+    properties:
+      Name: { type: title }
+      Severity: { type: select, options: [LOW, MEDIUM, HIGH, CRITICAL] }
+      Status: { type: select, options: [OPEN, MITIGATED, CLOSED] }
+      Mitigation: { type: rich_text }
+
+  - name: Sources
+    properties:
+      Name: { type: title }
+      Url: { type: url }
+      License: { type: rich_text }
+      Decision: { type: select, options: [CORE, ADAPTER, OPTIONAL, REIMPLEMENT, REFERENCE_ONLY, REJECT] }
+      Notes: { type: rich_text }
+
+  - name: Research Questions
+    properties:
+      Name: { type: title }
+      Status: { type: select, options: [OPEN, RESEARCHING, ANSWERED, BLOCKED, INVALIDATED] }
+      Priority: { type: select, options: [P0, P1, P2, P3] }
+      Hypothesis: { type: rich_text }
+
+  - name: Capabilities
+    properties:
+      Name: { type: title }
+      Category: { type: rich_text }
+      RiskLevel: { type: select, options: [SAFE, CONTROLLED, SENSITIVE, DANGEROUS] }
+      Description: { type: rich_text }
+
+  - name: Agents
+    properties:
+      Name: { type: title }
+      Role: { type: rich_text }
+      Status: { type: select, options: [PLANNED, ACTIVE, DEPRECATED] }
+      Autonomy: { type: select, options: [L0, L1, L2, L3, L4, L5] }
+
+  - name: Skills
+    properties:
+      Name: { type: title }
+      Category: { type: rich_text }
+      Status: { type: select, options: [ACTIVE, DUPLICATE, DEPRECATED] }
+      Source: { type: rich_text }
+
+  - name: Workflows
+    properties:
+      Name: { type: title }
+      Trigger: { type: rich_text }
+      ApprovalGate: { type: checkbox }
+      Stages: { type: rich_text }
+
+  - name: Knowledge
+    properties:
+      Name: { type: title }
+      Type: { type: select, options: [FACT, PATTERN, LESSON, FINDING, CONSTRAINT] }
+      Confidence: { type: select, options: [VERIFIED, LIKELY, UNVERIFIED] }
+      Content: { type: rich_text }
+
+seeds:
+  projects:
+    - name: Opencode
+      status: ACTIVE
+      phase: ARCHITECTURE
+      priority: P0
+      vision: Vendor-neutral AI Agent Operating System for software engineering.
+      repository: https://github.com/Raidan-Ai/RaidanOpencode
+  decisions:
+    - { adr_id: ADR-001, name: Vendor-Neutral Kernel }
+    - { adr_id: ADR-002, name: OpenCode as Runtime Adapter }
+    - { adr_id: ADR-003, name: One Canonical Orchestrator }
+    - { adr_id: ADR-004, name: Capability-First Routing }
+    - { adr_id: ADR-005, name: Minimum Sufficient Team }
+    - { adr_id: ADR-006, name: One Canonical Task Engine }
+    - { adr_id: ADR-007, name: Notion as Thinking/Governance Layer }
+  research_questions:
+    - What is the minimum useful Raidan Kernel?
+    - What should remain outside the kernel?
+    - Which upstream capabilities are truly unique?
+    - Where are the biggest duplication risks?
+    - What is the canonical task model?
+    - What is the canonical capability ontology?
+    - What is the canonical Skill model?
+    - How should Notion synchronization work?
+    - Which runtime adapters should be stable first?
+    - What is the safest autonomy model?

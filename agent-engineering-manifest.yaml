@@ -72,8 +72,24 @@ mcp:
     risk: low
     verified_connected: true
     added: 2026-08-23
+  - name: notion
+    type: local
+    command: npx @notionhq/notion-mcp-server
+    auth: env-ref(OPENAPI_MCP_HEADERS)
+    risk: medium
+    verified_connected: false
+    added: 2026-08-24
+    notes: official @notionhq server; token supplied via OPENAPI_MCP_HEADERS env var only
 a2a: []
-connectors: []
+connectors:
+  - id: notion
+    kind: knowledge-governance
+    transport: rest-api
+    auth: env-ref(NOTION_API_TOKEN)
+    status: scaffolded
+    added: 2026-08-24
+    docs: integrations/notion/README.md
+    notes: thinking-system ownership boundary documented; bootstrap is idempotent
 deployments: []
 
 policies:
