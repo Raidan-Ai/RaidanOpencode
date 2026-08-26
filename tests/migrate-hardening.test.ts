@@ -1,6 +1,14 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -29,9 +37,9 @@ test("migrate hardening: corrupt state file is quarantined and engine recovers",
   assert.equal(state.files.length, 0, "must fall back to a fresh manifest");
 
   // Evidence preserved, not destroyed.
-  const dirEntries = require("node:fs").readdirSync(join(fx.statePath, ".."));
+  const dirEntries = readdirSync(join(fx.statePath, ".."));
   assert.ok(
-    dirEntries.some((n: string) => n.includes(".corrupt-")),
+    dirEntries.some((n) => n.includes(".corrupt-")),
     `expected quarantine file, got: ${dirEntries.join(", ")}`,
   );
 
