@@ -26,7 +26,7 @@ context engine, memory engine, policy engine.
 - [x] Memory Engine (`src/core/memory/engine.ts`)
 - [x] Policy Engine (`src/core/policies/engine.ts`)
 
-## Phase 2 — OpenCode Adapter 🚧
+## Phase 2 — OpenCode Adapter ✅
 
 Normalize existing OpenCode configuration, agents, skills, commands, MCP,
 models and routing into Raidan contracts without leaking OpenCode
@@ -35,25 +35,26 @@ assumptions into the kernel.
 - [x] Skill registry (`src/core/skills/registry.ts`)
 - [x] Agent registry (`src/core/agents/registry.ts`)
 - [x] MCP registry (`src/core/mcp/registry.ts`)
-- [ ] Explicit `RuntimeAdapter` interface + RAAP contract extraction
-- [ ] OpenCode adapter package (`adapters/opencode/`)
-- [ ] Safe migration engine hardening (`src/core/migrate/engine.ts`)
+- [x] `RuntimeAdapter` interface + RAAP v1.0 contract (`src/core/runtime/adapter.ts`)
+- [x] OpenCode adapter package (`src/adapters/opencode/`) — full process lifecycle; RAAP transport explicitly stubbed pending verified stdio/SDK surface
+- [x] Migration engine hardening — atomic state, corrupt-state quarantine, case-insensitive ownership, backup/restore (`src/core/migrate/engine.ts`)
 
-## Phase 3 — Agents / Skills 📋
+## Phase 3 — Agents / Skills ✅ (core complete)
 
-- [ ] Capability Graph and Capability Registry as first-class objects
-- [ ] Prompt Fragment Registry + Prompt Compiler
-- [ ] Deduplication Engine (REUSE / EXTEND / MERGE / SPECIALIZE / CREATE)
-- [ ] Skill quality scoring and usage statistics
+- [x] Capability Registry + capability graph with routing queries (`src/core/capabilities/registry.ts`)
+- [x] Meta Router — capability requirements → deterministic team plans (`src/core/routing/meta-router.ts`)
+- [x] Prompt Fragment Registry + Prompt Compiler (`src/core/prompt/compiler.ts`)
+- [x] Deduplication Engine — REUSE/EXTEND/MERGE/SPECIALIZE/CREATE verdicts (`src/core/dedup/engine.ts`)
+- [ ] Skill quality scoring and usage statistics (uses dedup similarity primitives)
 
-## Phase 4 — Tasks / Swarms 📋
+## Phase 4 — Tasks / Swarms 🚧
 
 - [x] Task Engine (`src/core/tasks/engine.ts`)
 - [x] Teams/Swarm engine (`src/core/teams/engine.ts`)
 - [ ] Task leases (claim, heartbeat, expiry, recovery)
 - [ ] Workflow Engine with built-in workflow library
 - [ ] Workflow Compiler (objective → DAG)
-- [ ] Minimum-sufficient-team sizing policies
+- [ ] Minimum-sufficient-team sizing policies (seeded by MetaRouter team sizing)
 
 ## Phase 5 — Runtime / Sessions 📋
 
@@ -62,6 +63,7 @@ assumptions into the kernel.
 - [ ] Terminal abstraction (PTY / PowerShell / WSL backends)
 - [ ] Workspace & Worktree Manager
 - [ ] Conductor role implementation
+- [ ] OpenCode RAAP transport over verified stdio/SDK surface
 
 ## Phase 6 — Memory / Messaging 📋
 
@@ -73,7 +75,7 @@ assumptions into the kernel.
 ## Phase 7 — Security / Policy 📋
 
 - [x] Policy engine baseline
-- [ ] Trust levels (SAFE / CONTROLLED / SENSITIVE / DANGEROUS)
+- [ ] Trust levels (SAFE / CONTROLLED / SENSITIVE / DANGEROUS) enforcement
 - [ ] Approval gates for destructive operations
 - [ ] Autonomy levels L0–L5 per task
 - [ ] Audit trail for privileged actions
@@ -82,7 +84,7 @@ assumptions into the kernel.
 
 - [ ] Evaluation Engine (success rate, quality, latency, cost)
 - [ ] Benchmark suite
-- [ ] Failure-based routing scores
+- [ ] Failure-based routing scores (feeds MetaRouter weights × telemetry)
 - [ ] Observability query layer expansion (`src/core/observability/query.ts`)
 
 ## Phase 9 — Cross-Agent Adapters 🔮
