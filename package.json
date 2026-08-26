@@ -22,7 +22,7 @@
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "test": "npm run build && node --test dist/tests/core.test.js dist/tests/gateway-mcp.test.js dist/tests/engines.test.js dist/tests/runtime.test.js dist/tests/runtime-adapter.test.js dist/tests/opencode-adapter.test.js dist/tests/migrate-hardening.test.js dist/tests/capability-registry.test.js dist/tests/meta-router.test.js dist/tests/prompt-compiler.test.js dist/tests/tracing.test.js",
+    "test": "npm run build && node --test dist/tests/core.test.js dist/tests/gateway-mcp.test.js dist/tests/engines.test.js dist/tests/runtime.test.js dist/tests/runtime-adapter.test.js dist/tests/opencode-adapter.test.js dist/tests/migrate-hardening.test.js dist/tests/capability-registry.test.js dist/tests/meta-router.test.js dist/tests/prompt-compiler.test.js dist/tests/dedup-engine.test.js dist/tests/tracing.test.js",
     "smoke": "node dist/src/cli/index.js --version && node dist/src/cli/index.js doctor",
     "cli": "node dist/src/cli/index.js"
   },
