@@ -6,7 +6,44 @@ versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-### Restructuring (`restructure/repo-structure` branch)
+### Phase 3 — Agents / Skills (core complete)
+
+#### Added
+- **Capability Registry** (`src/core/capabilities/registry.ts`) — first-class
+  capability definitions, graph bindings across 7 subject types, bidirectional
+  lookups, `findCandidates` routing primitive with level/tool/subject-type
+  filters and score×confidence ranking.
+- **Meta Router** (`src/core/routing/meta-router.ts`) — turns capability
+  requirements into deterministic `RoutingPlan`s: primary + fallback
+  assignments, explicit unresolved tracking, minimum-sufficient-team sizing,
+  workspace strategy heuristic, normalized multi-objective weights (§11).
+- **Prompt Compiler** (`src/core/prompt/compiler.ts`) — fragment registry
+  (9 categories) + deterministic assembly of 8 canonical prompt sections;
+  validation warnings for security gaps, duplicates, unknown fragments, and
+  char-budget overrun.
+- **Deduplication Engine** (`src/core/dedup/engine.ts`) — deterministic
+  composite similarity (keywords/capabilities/purpose, Latin+Arabic tokenizer)
+  with REUSE / EXTEND / MERGE / SPECIALIZE / CREATE verdicts, configurable
+  thresholds, rationale on every decision.
+
+### Phase 2 — OpenCode Adapter (complete)
+
+#### Added
+- **RuntimeAdapter contract** (`src/core/runtime/adapter.ts`) — kernel-level
+  interface (16 lifecycle methods) + RAAP v1.0 wire envelope with monotonic
+  per-session seq, correlation/trace ids, factory + structural guard.
+- **OpenCode adapter** (`src/adapters/opencode/index.ts`) — full process
+  lifecycle over `RuntimeSupervisor`; configurable availability probe; typed
+  `RaapTransportNotImplementedError` for unimplemented RAAP transport (no
+  invented OpenCode APIs); persistent-state factory.
+
+#### Changed
+- **Migration engine hardening** (`src/core/migrate/engine.ts`) — atomic state
+  persistence (tmp+rename), corrupt-state quarantine + recovery,
+  case-insensitive ownership matching across plan/apply/rollback, explicit
+  `backup()`/`restore()` snapshots.
+
+### Restructuring
 
 #### Added
 - `ARCHITECTURE.md` — full Architecture Blueprint v1.0: C4 context/containers,
@@ -17,7 +54,11 @@ versioning follows [Semantic Versioning](https://semver.org/).
   mapped against the current codebase state.
 - `NOTICE` — project attribution notice.
 - `.env.example` — template for required environment variables.
-- `sources.lock.json` — pinned source provenance manifest (placeholder).
+- `docs/architecture|legal|guides|prompts|generated/` — blueprint §75 taxonomy
+  completed with index/policy files.
+- `sources.lock.json` — machine-readable pin of all 27 researched sources;
+  commit SHAs intentionally null until license-audit pinning (no fabricated
+  pins); zero-reuse flags for AGPL-3.0/SUL-1.0/UNKNOWN licenses.
 
 #### Changed
 - `LICENSE` — corrected copyright holder attribution.
